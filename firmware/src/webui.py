@@ -1,5 +1,6 @@
 import network
-import ssl
+import json
+import device
 import socket
 import time
 import os
@@ -9,10 +10,7 @@ PASSWORD = "00000000"
 CHANNEL = 1
 
 WEBSERVER_FILES_PATH = "public"
-WEBSERVER_PORT = 443
-
-SSL_KEY_PATH = "keys/key.der"
-SSL_CERT_PATH = "keys/cert.der"
+WEBSERVER_PORT = 80
 
 
 def open_access_point():
@@ -29,7 +27,17 @@ def open_access_point():
     print(f"IP Address: {ap.ifconfig()[0]}")
 
 
-def serve_file(client_socket, path):
+def serve_not_found(socket, path):
+    print(f"Path {path} not found")
+
+    socket.send("HTTP/1.1 404 Not Found\r\n")
+    socket.send("Content-Type: text/html\r\n")
+    socket.send("Connection: close\r\n\r\n")
+    socket.send(
+        "<html><body><h1>404 Not Found</h1></body></html>"
+    )
+
+def serve_file(socket, path):
     if not path.startswith("/"):
         path = "/" + path
 
@@ -52,47 +60,56 @@ def serve_file(client_socket, path):
         elif path.endswith(".json"):
             content_type = "application/json"
 
-        client_socket.send("HTTP/1.1 200 OK\r\n")
-        client_socket.send(f"Content-Type: {content_type}\r\n")
-        client_socket.send("Connection: close\r\n\r\n")
+        socket.send("HTTP/1.1 200 OK\r\n")
+        socket.send(f"Content-Type: {content_type}\r\n")
+        socket.send("Connection: close\r\n\r\n")
 
         with open(file_path, "rb") as file:
             chunk = file.read(1024)
             while chunk:
-                client_socket.write(chunk)
+                socket.write(chunk)
                 chunk = file.read(1024)
 
-    except OSError as e:
-        client_socket.send("HTTP/1.1 404 Not Found\r\n")
-        client_socket.send("Content-Type: text/html\r\n")
-        client_socket.send("Connection: close\r\n\r\n")
-        client_socket.send(
-            "<html><body><h1>404 Not Found</h1><p>The requested file could not be found on the server.</p></body></html>"
-        )
-        print(f"Error serving {file_path}: {e}")
+    except OSError:
+        serve_not_found(socket, path)
+        return
+
+
+def handle_request(socket, path):
+    response = ""
+
+    if path == "/networks/timeout":
+        response = "{" + f'"timeout": {device.NETWORK_SCAN_TIMEOUT}' + "}"
+    elif path == "/networks":
+        print("Scanning networks ...")
+        networks = device.get_networks()
+        print(f"Finished scanning, found {len(networks)} networks")
+
+        response = json.dumps(networks)
+
+    else:
+        serve_not_found(socket, path)
+        return
+
+    socket.send("HTTP/1.1 200 OK\r\n")
+    socket.send("Content-Type: application/json\r\n")
+    socket.send("Connection: close\r\n\r\n")
+    socket.write(response)
 
 
 def start_webserver():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(("0.0.0.0", WEBSERVER_PORT))
     server_socket.listen(5)
-    print(f"Web server started on port {WEBSERVER_PORT}")
 
-    sslCon = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    sslCon.load_cert_chain(SSL_CERT_PATH, SSL_KEY_PATH)
+    print(f"Web server running on port {WEBSERVER_PORT}")
 
     try:
         while True:
-            client_socket, addr = server_socket.accept()
+            client, addr = server_socket.accept()
             print(f"\nClient connected from {addr}")
 
-            client = sslCon.wrap_socket(
-                client_socket,
-                server_side=True,
-            )
-
             try:
-
                 request = client.recv(1024).decode("utf-8")
                 if not request:
                     continue
@@ -108,7 +125,17 @@ def start_webserver():
                 method, path, _ = first_line_parts
                 print(f"Received {method} request for {path}")
 
-                serve_file(client, path)
+                if path.startswith("/device"):
+                    path = "/" + "/".join(path.split("/")[2:])
+
+                    if path.endswith("/"):
+                        path = path[:-1]
+
+                    handle_request(client, path)
+                else:
+                    serve_file(client, path)
+
+
 
             except Exception as e:
                 print(f"Error handling request: {e}")

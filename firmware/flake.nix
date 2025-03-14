@@ -32,6 +32,10 @@
         echo "  - keys: Generate new SSL keys into the src directory"
 
         webui() {
+          echo "Ensuring node_modules are installed ..."
+          cd $WEBUI_DIR && npm install
+          cd ..
+
           echo "Compiling webui to src/public ..."
           
           if [ ! -d "$WEBUI_DIR" ]; then
@@ -93,8 +97,8 @@
             return 1
           fi
 
-          keys
-          trap "rm -rf $KEYS_DIR" RETURN # Remove keys at the end of function
+          # keys
+          # trap "rm -rf $KEYS_DIR" RETURN # Remove keys at the end of function
 
           echo "Flashing '$SRC_DIR' directory to Raspberry Pi Pico on '$PICO_PORT' ..."
 
