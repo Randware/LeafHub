@@ -13,6 +13,8 @@ CHANNEL = 1
 WEBSERVER_FILES_PATH = "public"
 WEBSERVER_PORT = 80
 
+WEBSERVER_RUNNING = True
+
 
 def open_access_point():
     ap = network.WLAN(network.AP_IF)
@@ -117,6 +119,11 @@ def handle_request(sock, req):
                 {"message": "Config successfully updated", "updated": updated}
             )
 
+        elif req.path == "/exit":
+            global WEBSERVER_RUNNING
+            WEBSERVER_RUNNING = False
+            response = '{"message": "Exiting configuration mode"}'
+
         else:
             serve_not_found(sock, req.path)
             return
@@ -129,46 +136,47 @@ def handle_request(sock, req):
 
 
 def start_webserver():
+    global WEBSERVER_RUNNING
+    WEBSERVER_RUNNING = True
+
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.bind(("0.0.0.0", WEBSERVER_PORT))
     server_socket.listen(5)
 
     print(f"Web server running on port {WEBSERVER_PORT}")
 
-    try:
-        while True:
-            sock, addr = server_socket.accept()
+    while WEBSERVER_RUNNING:
+        sock, addr = server_socket.accept()
 
-            print(f"\nClient connected from {addr}")
+        print(f"\nClient connected from {addr}")
 
-            try:
-                raw_request = sock.recv(1024).decode("utf-8")
+        try:
+            raw_request = sock.recv(1024).decode("utf-8")
 
-                if not raw_request:
-                    continue
+            if not raw_request:
+                continue
 
-                req = Request(raw_request)
+            req = Request(raw_request)
 
-                print(f"Received {req.method} request for {req.path}")
+            print(f"Received {req.method} request for {req.path}")
 
-                if req.path.startswith("/device"):
-                    parts = req.path.split("/")
-                    req.path = "/" + "/".join(parts[2:])
+            if req.path.startswith("/device"):
+                parts = req.path.split("/")
+                req.path = "/" + "/".join(parts[2:])
 
-                    if req.path.endswith("/"):
-                        req.path = req.path[:-1]
+                if req.path.endswith("/"):
+                    req.path = req.path[:-1]
 
-                    handle_request(sock, req)
-                else:
-                    serve_file(sock, req.path)
-            except Exception as e:
-                print(f"Error handling request: {e}")
-            finally:
-                sock.close()
-    except KeyboardInterrupt:
-        print("Server stopped")
-    finally:
-        server_socket.close()
+                handle_request(sock, req)
+            else:
+                serve_file(sock, req.path)
+        except Exception as e:
+            print(f"Error handling request: {e}")
+        finally:
+            sock.close()
+                
+    server_socket.close()
 
 
 def start():

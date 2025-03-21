@@ -49,7 +49,3 @@ def save_server_address(server_address: str):
 def save_auth_token(auth_token: str):
     CONFIG.auth_token = auth_token
     CONFIG.save()
-
-
-def get_config() -> config.Config:
-    return CONFIG
