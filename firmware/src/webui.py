@@ -4,6 +4,7 @@ import device
 import socket
 import time
 import os
+from util import Request
 
 SSID = "LeafHubSmartPot"
 PASSWORD = "00000000"
@@ -27,17 +28,16 @@ def open_access_point():
     print(f"IP Address: {ap.ifconfig()[0]}")
 
 
-def serve_not_found(socket, path):
+def serve_not_found(sock, path):
     print(f"Path {path} not found")
 
-    socket.send("HTTP/1.1 404 Not Found\r\n")
-    socket.send("Content-Type: text/html\r\n")
-    socket.send("Connection: close\r\n\r\n")
-    socket.send(
-        "<html><body><h1>404 Not Found</h1></body></html>"
-    )
+    sock.send("HTTP/1.1 404 Not Found\r\n")
+    sock.send("Content-Type: text/html\r\n")
+    sock.send("Connection: close\r\n\r\n")
+    sock.send("<html><body><h1>404 Not Found</h1></body></html>")
 
-def serve_file(socket, path):
+
+def serve_file(sock, path):
     if not path.startswith("/"):
         path = "/" + path
 
@@ -60,41 +60,72 @@ def serve_file(socket, path):
         elif path.endswith(".json"):
             content_type = "application/json"
 
-        socket.send("HTTP/1.1 200 OK\r\n")
-        socket.send(f"Content-Type: {content_type}\r\n")
-        socket.send("Connection: close\r\n\r\n")
+        sock.send("HTTP/1.1 200 OK\r\n")
+        sock.send(f"Content-Type: {content_type}\r\n")
+        sock.send("Connection: close\r\n\r\n")
 
         with open(file_path, "rb") as file:
             chunk = file.read(1024)
             while chunk:
-                socket.write(chunk)
+                sock.write(chunk)
                 chunk = file.read(1024)
 
     except OSError:
-        serve_not_found(socket, path)
+        serve_not_found(sock, path)
         return
 
 
-def handle_request(socket, path):
-    response = ""
+def send_response(sock, code, response):
+    sock.send(f"HTTP/1.1 {code}\r\n")
+    sock.send("Content-Type: application/json\r\n")
+    sock.send("Connection: close\r\n\r\n")
+    sock.write(response)
 
-    if path == "/networks/timeout":
-        response = "{" + f'"timeout": {device.NETWORK_SCAN_TIMEOUT}' + "}"
-    elif path == "/networks":
-        print("Scanning networks ...")
-        networks = device.get_networks()
-        print(f"Finished scanning, found {len(networks)} networks")
 
-        response = json.dumps(networks)
+def handle_request(sock, req):
+    code = "200 OK"
+    response = '{"message": "success"}'
+
+    if req.method == "GET":
+        if req.path == "/networks/timeout":
+            response = "{" + f'"timeout": {device.NETWORK_SCAN_TIMEOUT}' + "}"
+
+        elif req.path == "/networks":
+            print("Scanning networks ...")
+            networks = device.get_networks()
+            print(f"Finished scanning, found {len(networks)} networks")
+
+            response = json.dumps(networks)
+
+        elif req.path == "/config":
+            updated = {}
+
+            if "network_ssid" in req.params:
+                device.save_network_ssid(req.params["network_ssid"])
+                updated["network_ssid"] = req.params["network_ssid"]
+            if "network_password" in req.params:
+                device.save_network_password(req.params["network_password"])
+                updated["network_password"] = req.params["network_password"]
+            if "server_address" in req.params:
+                device.save_server_address(req.params["server_address"])
+                updated["server_address"] = req.params["server_address"]
+            if "auth_token" in req.params:
+                device.save_auth_token(req.params["auth_token"])
+                updated["auth_token"] = req.params["auth_token"]
+
+            response = json.dumps(
+                {"message": "Config successfully updated", "updated": updated}
+            )
+
+        else:
+            serve_not_found(sock, req.path)
+            return
 
     else:
-        serve_not_found(socket, path)
+        serve_not_found(sock, req.path)
         return
 
-    socket.send("HTTP/1.1 200 OK\r\n")
-    socket.send("Content-Type: application/json\r\n")
-    socket.send("Connection: close\r\n\r\n")
-    socket.write(response)
+    send_response(sock, code, response)
 
 
 def start_webserver():
@@ -106,42 +137,34 @@ def start_webserver():
 
     try:
         while True:
-            client, addr = server_socket.accept()
+            sock, addr = server_socket.accept()
+
             print(f"\nClient connected from {addr}")
 
             try:
-                request = client.recv(1024).decode("utf-8")
-                if not request:
+                raw_request = sock.recv(1024).decode("utf-8")
+
+                if not raw_request:
                     continue
 
-                request_lines = request.split("\r\n")
-                if not request_lines:
-                    continue
+                req = Request(raw_request)
 
-                first_line_parts = request_lines[0].split()
-                if len(first_line_parts) < 3:
-                    continue
+                print(f"Received {req.method} request for {req.path}")
 
-                method, path, _ = first_line_parts
-                print(f"Received {method} request for {path}")
+                if req.path.startswith("/device"):
+                    parts = req.path.split("/")
+                    req.path = "/" + "/".join(parts[2:])
 
-                if path.startswith("/device"):
-                    path = "/" + "/".join(path.split("/")[2:])
+                    if req.path.endswith("/"):
+                        req.path = req.path[:-1]
 
-                    if path.endswith("/"):
-                        path = path[:-1]
-
-                    handle_request(client, path)
+                    handle_request(sock, req)
                 else:
-                    serve_file(client, path)
-
-
-
+                    serve_file(sock, req.path)
             except Exception as e:
                 print(f"Error handling request: {e}")
             finally:
-                client.close()
-
+                sock.close()
     except KeyboardInterrupt:
         print("Server stopped")
     finally:

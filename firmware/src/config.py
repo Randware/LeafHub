@@ -6,10 +6,10 @@ CONFIG_PATH: str = "config.json"
 class Config:
     def __init__(
         self,
-        network_ssid: str,
-        network_password: str,
-        server_address: str,
-        auth_token: str,
+        network_ssid: str | None = None,
+        network_password: str | None = None,
+        server_address: str | None = None,
+        auth_token: str | None = None,
     ) -> None:
         self.network_ssid = network_ssid
         self.network_password = network_password
@@ -21,19 +21,27 @@ class Config:
             json.dump(self.__dict__, f)
 
 
-def exists() -> bool:
+def is_valid() -> bool:
     try:
         with open(CONFIG_PATH, "r") as f:
-            config = json.load(f)
+            config: dict = json.load(f)
 
-            Config(**config)
+            c: Config = Config(**config)
+
+            for _, value in c.__dict__.items():
+                if value is None or value == "":
+                    return False
+
         return True
-    except (OSError, ValueError):
+    except (OSError, ValueError, TypeError):
         return False
 
 
 def load() -> Config:
-    with open(CONFIG_PATH, "r") as f:
-        config = json.load(f)
+    try:
+        with open(CONFIG_PATH, "r") as f:
+            config = json.load(f)
 
-        return Config(**config)
+            return Config(**config)
+    except OSError:
+        return Config()
