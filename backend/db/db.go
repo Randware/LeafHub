@@ -1,13 +1,8 @@
 package db
 
-func Start(config *SQLiteConfig) {
+import "fmt"
 
-}
-
-func Start(config *MySQLConfig) {
-
-}
-
-func Start(config *PostgresConfig) {
-
+func Start(config DBConfig) {
+	// TODO: I am going back to 505
+	fmt.Println(config.Connection())
 }
