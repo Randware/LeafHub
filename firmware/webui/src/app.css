@@ -1,3 +1,15 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+@theme {
+	--color-light: rgb(241 253 243);
+	--color-medium: rgb(229 244 231);
+	--color-secondary: rgb(209 233 210);
+	--color-primary: rgb(153, 205, 169);
+	--color-dark: rgb(50 50 50);
+}
+
+* {
+	font-family: sans-serif;
+}

@@ -1,23 +1,12 @@
 <script lang="ts">
+	import Header from '$lib/components/Header.svelte';
 	import PageContainer from '$lib/components/PageContainer.svelte';
-	import { onMount } from 'svelte';
-
-	let pageContainer: PageContainer;
-
-	let firstPage: boolean;
-	let lastPage: boolean;
-
-	onMount(() => {
-		pageContainer.pageState.subscribe((state) => {
-			firstPage = state.firstPage;
-			lastPage = state.lastPage;
-		});
-	});
 </script>
 
-<PageContainer bind:this={pageContainer} />
+<div class="bg-light flex h-[100vh] w-[100vw] items-center justify-center p-6">
+	<div class="bg-secondary flex h-full w-full flex-col gap-6 rounded-xl p-6">
+		<Header />
 
-<div>
-	<button onclick={pageContainer.prev} disabled={firstPage}>Back</button>
-	<button onclick={pageContainer.next} disabled={lastPage}>Next</button>
+		<PageContainer />
+	</div>
 </div>

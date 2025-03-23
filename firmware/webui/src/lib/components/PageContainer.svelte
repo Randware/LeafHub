@@ -1,54 +1,63 @@
 <script lang="ts">
-	import { writable } from 'svelte/store';
+	import type { Component } from 'svelte';
 	import AuthPage from './pages/AuthPage.svelte';
 	import FinishPage from './pages/FinishPage.svelte';
 	import NetworkPage from './pages/NetworkPage.svelte';
 	import ServerPage from './pages/ServerPage.svelte';
 	import WelcomePage from './pages/WelcomePage.svelte';
 
-	type Page = 'welcome' | 'network' | 'server' | 'auth' | 'finish';
+	type Step = {
+		component: Component<{ block: boolean }>;
+		block: boolean;
+	};
 
-	const stepOrder: Page[] = ['welcome', 'network', 'server', 'auth', 'finish'];
-	let currentStep: Page = 'welcome';
+	const steps: Step[] = [
+		{ component: WelcomePage, block: false },
+		{ component: NetworkPage, block: true },
+		{ component: ServerPage, block: false },
+		{ component: AuthPage, block: false },
+		{ component: FinishPage, block: false }
+	];
+
+	let currentStep: Step = steps[0];
+
+	$: firstPage = currentStep === steps[0];
+	$: lastPage = currentStep === steps[steps.length - 1];
 
 	export function next() {
-		const currentIndex = stepOrder.indexOf(currentStep);
-		if (currentIndex < stepOrder.length - 1) {
-			currentStep = stepOrder[currentIndex + 1];
-			updateState();
+		const idx = steps.indexOf(currentStep);
+
+		if (idx < steps.length - 1) {
+			currentStep = steps[idx + 1];
 		}
 	}
 
 	export function prev() {
-		const currentIndex = stepOrder.indexOf(currentStep);
+		const idx = steps.indexOf(currentStep);
 
-		if (currentIndex > 0) {
-			currentStep = stepOrder[currentIndex - 1];
-			updateState();
+		if (idx > 0) {
+			currentStep = steps[idx - 1];
 		}
-	}
-
-	export const pageState = writable({
-		firstPage: currentStep === stepOrder[0],
-		lastPage: currentStep === stepOrder[stepOrder.length - 1]
-	});
-
-	function updateState() {
-		pageState.set({
-			firstPage: currentStep === stepOrder[0],
-			lastPage: currentStep === stepOrder[stepOrder.length - 1]
-		});
 	}
 </script>
 
-{#if currentStep === 'welcome'}
-	<WelcomePage />
-{:else if currentStep === 'network'}
-	<NetworkPage />
-{:else if currentStep === 'server'}
-	<ServerPage />
-{:else if currentStep === 'auth'}
-	<AuthPage />
-{:else if currentStep === 'finish'}
-	<FinishPage />
-{/if}
+<main class="flex h-full flex-col items-center justify-center">
+	<svelte:component this={currentStep.component} bind:block={currentStep.block} />
+</main>
+
+<footer class="flex w-full justify-between">
+	<button
+		class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-lg font-semibold transition-colors"
+		onclick={prev}
+		disabled={firstPage}
+	>
+		Back
+	</button>
+	<button
+		class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-lg font-semibold transition-colors"
+		onclick={next}
+		disabled={currentStep.block || lastPage}
+	>
+		Next
+	</button>
+</footer>
