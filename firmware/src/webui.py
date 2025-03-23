@@ -46,6 +46,13 @@ def serve_file(sock, path):
     if path == "/":
         path = "/index.html"
 
+    try:
+        os.stat(WEBSERVER_FILES_PATH)
+    except OSError:
+        print(f'"{WEBSERVER_FILES_PATH}" folder not found')
+        print("Please ensure the webui was correctly flashed onto the device")
+        return
+
     file_path = WEBSERVER_FILES_PATH + path
 
     try:
