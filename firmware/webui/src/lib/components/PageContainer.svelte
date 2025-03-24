@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
+	import { fly, fade } from 'svelte/transition';
 	import AuthPage from './pages/AuthPage.svelte';
 	import FinishPage from './pages/FinishPage.svelte';
 	import NetworkPage from './pages/NetworkPage.svelte';
@@ -20,6 +21,10 @@
 	];
 
 	let currentStep: Step = steps[0];
+	let currentIndex = 0;
+
+	let direction = 1;
+	let slideDistance = 10;
 
 	$: firstPage = currentStep === steps[0];
 	$: lastPage = currentStep === steps[steps.length - 1];
@@ -28,7 +33,9 @@
 		const idx = steps.indexOf(currentStep);
 
 		if (idx < steps.length - 1) {
-			currentStep = steps[idx + 1];
+			direction = 1;
+			currentIndex = idx + 1;
+			currentStep = steps[currentIndex];
 		}
 	}
 
@@ -36,26 +43,32 @@
 		const idx = steps.indexOf(currentStep);
 
 		if (idx > 0) {
-			currentStep = steps[idx - 1];
+			direction = -1;
+			currentIndex = idx - 1;
+			currentStep = steps[currentIndex];
 		}
 	}
 </script>
 
-<main class="flex h-full flex-col items-center justify-center">
-	<svelte:component this={currentStep.component} bind:block={currentStep.block} />
+<main class="bg-light flex h-full flex-col items-center justify-center rounded-xl p-12">
+	{#key currentIndex}
+		<div in:fly={{ x: direction * slideDistance, duration: 500, opacity: 0 }}>
+			<svelte:component this={currentStep.component} bind:block={currentStep.block} />
+		</div>
+	{/key}
 </main>
 
 <footer class="flex w-full justify-between">
 	<button
-		class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-lg font-semibold transition-colors"
-		onclick={prev}
+		class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
+		on:click={prev}
 		disabled={firstPage}
 	>
 		Back
 	</button>
 	<button
-		class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-lg font-semibold transition-colors"
-		onclick={next}
+		class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
+		on:click={next}
 		disabled={currentStep.block || lastPage}
 	>
 		Next
