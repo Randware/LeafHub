@@ -50,7 +50,9 @@
 	}
 </script>
 
-<main class="bg-light flex h-full flex-col items-center justify-center rounded-xl p-12">
+<main
+	class="bg-light text-dark flex h-full flex-col items-center justify-center rounded-xl p-12 text-xl"
+>
 	{#key currentIndex}
 		<div in:fly={{ x: direction * slideDistance, duration: 500, opacity: 0 }}>
 			<svelte:component this={currentStep.component} bind:block={currentStep.block} />
