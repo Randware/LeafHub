@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@fontsource-variable/roboto':
+        specifier: ^5.2.5
+        version: 5.2.5
+      '@fontsource-variable/roboto-slab':
+        specifier: ^5.2.5
+        version: 5.2.5
       jsqr:
         specifier: ^1.4.0
         version: 1.4.0
@@ -284,6 +290,12 @@ packages:
   '@eslint/plugin-kit@0.2.7':
     resolution: {integrity: sha512-JubJ5B2pJ4k4yGxaNLdbjrnk9d/iDz6/q8wOilpIowd6PJPgaxCuHBnBszq7Ce2TyMrywm5r4PnKm6V3iiZF+g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@fontsource-variable/roboto-slab@5.2.5':
+    resolution: {integrity: sha512-q8dTQbL6/OMoMpWv2HCPfVZCkl6qWWS0z78k7HaJgNfL3ywwCg6np8Le50Nad2eWQO20t6zWkRZ/KJuJ2FaDAA==}
+
+  '@fontsource-variable/roboto@5.2.5':
+    resolution: {integrity: sha512-csqBSOWXv0h5IbPhEqYJua6/nxl7dSNZbBOMeXSO9aqzgPw3GpfgC9kL5M6ULFLRaoDoBD4U9QctoDLKMaTyMg==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -1550,6 +1562,10 @@ snapshots:
     dependencies:
       '@eslint/core': 0.12.0
       levn: 0.4.1
+
+  '@fontsource-variable/roboto-slab@5.2.5': {}
+
+  '@fontsource-variable/roboto@5.2.5': {}
 
   '@humanfs/core@0.19.1': {}
 

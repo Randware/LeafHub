@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-
 @import 'tailwindcss';
+@import '@fontsource-variable/roboto-slab';
+@import '@fontsource-variable/roboto';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
@@ -10,7 +10,7 @@
 	--color-secondary: rgb(209 233 210);
 	--color-primary: rgb(153, 205, 169);
 	--color-dark: rgb(50 50 50);
-	--font-fancy: 'Roboto Slab', sans-serif;
-	--font-simple: 'Roboto', sans-serif;
-	--default-font-family: 'Roboto', sans-serif;
+	--font-fancy: 'Roboto Slab Variable', sans-serif;
+	--font-simple: 'Roboto Variable', sans-serif;
+	--default-font-family: 'Roboto Variable', sans-serif;
 }

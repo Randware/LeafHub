@@ -44,6 +44,8 @@
 		]
 	},
 	"dependencies": {
+		"@fontsource-variable/roboto": "^5.2.5",
+		"@fontsource-variable/roboto-slab": "^5.2.5",
 		"jsqr": "^1.4.0"
 	}
 }
