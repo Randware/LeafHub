@@ -18,7 +18,8 @@ if __name__ == "__main__":
 
             try:
                 monitor.start()
-            except Exception:
+            except Exception as e:
+                print(e)
                 print("Monitoring failed, entering configuration mode ...")
                 webui.start()
         else:

@@ -1,10 +1,17 @@
 import network
 import time
 import config
+from machine import Pin
 
 NETWORK_SCAN_TIMEOUT = 10
 CONFIG = config.load()
+LED = Pin("LED", Pin.OUT)
 
+def led_on():
+    LED.on()
+
+def led_off():
+    LED.off()
 
 def get_networks():
     wifi = network.WLAN(network.STA_IF)

@@ -187,5 +187,6 @@ def start_webserver():
 
 
 def start():
+    device.led_on()
     open_access_point()
     start_webserver()

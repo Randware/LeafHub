@@ -1,8 +1,12 @@
 import config
+import requests
 import network
+import device
 import time
+import urequests
 
 NETWORK_CONNECT_ATTEMPTS = 3
+PROBING_INTERVAL = 1
 
 def connect_network():
     wlan = network.WLAN(network.STA_IF)
@@ -38,9 +42,44 @@ def connect_network():
     raise ConnectionError
 
     
-def start():
-    connect_network()
-    
-    print("Monitoring is running ...")
+def take_probe():
+    # Sample data 
+    #  TODO: Measure sensors
+    data = {"temperature": 34, "humidity": 60}
+
+    return data
+
+def send_probe(url, headers):
+    data = take_probe()
+
+    response = requests.post(url, json=data, headers=headers)
+
+    code = response.status_code
+    text = response.text
+
+    if code < 300:
+        print(f"Successfully sent probe ({code})")
+    else:
+        print(f"Failed sending probe ({code}): {text}")
+
+    response.close()
+
+
+def start_sending():
+    conf = config.load()
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-Auth-Token": conf.auth_token
+    }
+
+    url = conf.server_address
+
     while True:
-        pass
+        send_probe(url, headers)
+        time.sleep(PROBING_INTERVAL)
+
+def start():
+    device.led_off()
+    connect_network()
+    start_sending()
