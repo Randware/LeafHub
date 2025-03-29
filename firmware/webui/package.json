@@ -46,6 +46,7 @@
 	"dependencies": {
 		"@fontsource-variable/roboto": "^5.2.5",
 		"@fontsource-variable/roboto-slab": "^5.2.5",
+		"@lucide/svelte": "^0.485.0",
 		"jsqr": "^1.4.0"
 	}
 }

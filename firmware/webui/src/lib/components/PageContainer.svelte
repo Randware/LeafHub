@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
-	import { fly, fade } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import AuthPage from './pages/AuthPage.svelte';
 	import FinishPage from './pages/FinishPage.svelte';
 	import NetworkPage from './pages/NetworkPage.svelte';
@@ -50,11 +50,12 @@
 	}
 </script>
 
-<main
-	class="bg-light text-dark flex h-full flex-col items-center justify-center rounded-xl p-12 text-xl"
->
+<main class="bg-light text-dark h-full overflow-hidden rounded-xl p-6 text-xl">
 	{#key currentIndex}
-		<div in:fly={{ x: direction * slideDistance, duration: 500, opacity: 0 }}>
+		<div
+			in:fly={{ x: direction * slideDistance, duration: 500, opacity: 0 }}
+			class="flex h-full flex-col items-center justify-center"
+		>
 			<svelte:component this={currentStep.component} bind:block={currentStep.block} />
 		</div>
 	{/key}
