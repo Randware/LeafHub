@@ -12,7 +12,7 @@
 	let networks: Promise<Network[]> = Promise.resolve(currentNetworks);
 
 	async function fetchNetworks(): Promise<Network[]> {
-		const response = await fetch(`http://${host}/device/networks/`);
+		const response: Response = await fetch(`http://${host}/device/networks/`);
 
 		if (!response.ok) {
 			throw new Error(`Failed to fetch networks: ${response.status}`);

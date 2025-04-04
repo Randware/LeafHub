@@ -3,7 +3,6 @@ import time
 import config
 from machine import Pin
 
-NETWORK_SCAN_TIMEOUT = 10
 CONFIG = config.load()
 LED = Pin("LED", Pin.OUT)
 
