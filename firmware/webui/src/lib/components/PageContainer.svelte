@@ -64,14 +64,14 @@
 <footer class="flex w-full justify-between">
 	<button
 		class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
-		on:click={prev}
+		onclick={prev}
 		disabled={firstPage}
 	>
 		Back
 	</button>
 	<button
 		class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
-		on:click={next}
+		onclick={next}
 		disabled={currentStep.block || lastPage}
 	>
 		Next
