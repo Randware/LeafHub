@@ -4,13 +4,14 @@
 	import NetworkConnector from '../NetworkConnector.svelte';
 	import type { Network } from '../NetworkItem.svelte';
 	import NetworkScanner from '../NetworkScanner.svelte';
+	import { fly, slide } from 'svelte/transition';
 
 	export let block: boolean;
 
 	let selectedNetwork: Network | null = null;
 	let showConnector: boolean = false;
 
-	function connectNetwork(ssid: string, password: string) {
+	function connectNetwork(ssid: string, password: string | null) {
 		// TODO: Send network to controller
 
 		selectedNetwork = null;
@@ -19,7 +20,12 @@
 
 	function selectNetwork(network: Network) {
 		selectedNetwork = network;
-		showConnector = true;
+
+		if (network.type == 'OPEN') {
+			connectNetwork(network.ssid, null);
+		} else {
+			showConnector = true;
+		}
 	}
 
 	function unselectNetwork() {
@@ -50,7 +56,7 @@
 			</FloatingWindow>
 		{/if}
 	{:else}
-		<div class="flex flex-col items-center gap-6">
+		<div class="flex flex-col items-center gap-6" in:fly={{ x: 10, duration: 500, opacity: 0 }}>
 			<div class="font-fancy text-3xl font-extrabold">Finished network configuration!</div>
 			<CircleCheck size={48} class="text-primary" />
 			<button
