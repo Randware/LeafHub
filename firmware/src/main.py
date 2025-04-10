@@ -3,6 +3,7 @@ from time import sleep
 import config
 import monitor
 
+
 EXECUTION_DELAY = 1
 
 if __name__ == "__main__":

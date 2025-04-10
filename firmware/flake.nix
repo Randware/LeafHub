@@ -1,5 +1,5 @@
 {
-  description = "Nix flake for flashing Raspberry Pi Pico W with mpremote, resetting it, and connecting to serial output using tio";
+  description = "Development flake for the LeafHub microcontroller firmware";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
 
@@ -12,24 +12,28 @@
         nodejs_23
         mpremote
         openssl
-        tio
       ];
 
       shellHook = ''
-        PICO_PORT="/dev/ttyACM0"
         SRC_DIR="src"
         WEBUI_DIR="webui"
         PUBLIC_DIR="$SRC_DIR/public"
         KEYS_DIR="$SRC_DIR/keys"
+        HAL_DIR="hal"
 
-        echo "Successfully entered Raspberry Pi Pico development environment"
+        echo ""
+        echo "Successfully entered LeafHub firmware development environment"
         echo ""
         echo "The following commands are available:"
         echo "  - monitor: Connect to the serial port to monitor output"
-        echo "  - flash: Flashes the src folder onto the pico"
-        echo "  - format: Formats the picos filesystem"
+        echo "  - flash: Flashes the src folder onto the microcontroller"
+        echo "  - format: Formats the microcontrollers filesystem"
         echo "  - webui: Compile the svelte webui into the src/public folder"
+        echo "  - hal <name>: Flash the HAL (Hardware Abstraction Layer) files onto the controller"
         echo "  - keys: Generate new SSL keys into the src directory"
+        echo ""
+        echo "Warning: These provided commands automatically detect connected controllers, make sure there is only one!"
+        echo ""
 
         webui() {
           echo "Ensuring node_modules are installed ..."
@@ -66,8 +70,45 @@
 
         format() {
           echo "Formatting filesystem ..."
-          mpremote exec --no-follow "import os, machine, rp2; os.umount('/'); bdev = rp2.Flash(); os.VfsLfs2.mkfs(bdev, progsize=256); vfs = os.VfsLfs2(bdev, progsize=256); os.mount(vfs, '/'); machine.reset()" || exit
-          echo "Successfully formatted file system"
+
+          mpremote connect auto exec "$(cat <<EOF
+        import os
+
+        def clear(directory):
+            for file_info in os.ilistdir(directory):
+                file_name, file_type = file_info[0:2]
+                if file_name == 'boot.py':
+                    continue
+                file_full_name = "{}/{}".format(directory, file_name)
+                if file_type == 0x8000:
+                    os.remove(file_full_name)
+                else:
+                    clear(file_full_name)
+                    os.rmdir(file_full_name)
+
+        clear("/")
+        print("Successfully formatted file system")
+        EOF
+          )"
+        }
+
+        hal() {
+          if [ -z "$1" ]; then
+            echo "Please provide a HAL file: hal <name>"
+            return 1
+          fi
+
+          HAL_FILE="$HAL_DIR/$1.py"
+
+          if [ -f "$HAL_FILE" ]; then
+            echo "Found $HAL_FILE HAL file"
+          else
+            echo "No '$1' HAL file could be found in '$HAL_DIR' directory"
+            return 1
+          fi
+
+          echo "Flashing HAL files to controller ..."
+          mpremote connect auto fs cp "$HAL_FILE" ":/hardware.py"
         }
 
         keys() {
@@ -86,9 +127,8 @@
         }
 
         monitor() {
-          # Connect to the serial output
           echo "Connecting to serial output ..."
-          tio $PICO_PORT
+          mpremote repl
         }
 
         flash() {
@@ -100,27 +140,26 @@
           # keys
           # trap "rm -rf $KEYS_DIR" RETURN # Remove keys at the end of function
 
-          echo "Flashing '$SRC_DIR' directory to Raspberry Pi Pico on '$PICO_PORT' ..."
+          echo "Flashing '$SRC_DIR' directory to Raspberry Pi Pico on '$SERIAL_PORT' ..."
 
           directories=$(find "$SRC_DIR" -type d | sort)
           for dir in $directories; do
             if [ "$dir" != "$SRC_DIR" ]; then
               dest_dir="$(echo "$dir" | sed "s|$SRC_DIR/||")"
               echo "Creating directory: /$dest_dir"
-              mpremote connect $PICO_PORT fs mkdir ":/$dest_dir" || true
+              mpremote connect auto fs mkdir ":/$dest_dir" || true
             fi
           done
 
           for file in $(find "$SRC_DIR" -type f); do
             dest_path="$(echo "$file" | sed "s|$SRC_DIR/||")"
             echo "Copying $file to /:$dest_path"
-            mpremote connect $PICO_PORT fs cp "$file" ":/$dest_path"
+            mpremote connect auto fs cp "$file" ":/$dest_path"
           done
 
           echo "Resetting the Raspberry Pi Pico ..."
-          mpremote connect $PICO_PORT reset
+          mpremote connect auto reset
         }
-
       '';
     };
   };

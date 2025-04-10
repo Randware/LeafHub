@@ -1,10 +1,11 @@
 import network
 import time
+import hardware
 import config
 from machine import Pin
 
 CONFIG = config.load()
-LED = Pin("LED", Pin.OUT)
+LED = Pin(hardware.PINS["status_led"].pin, Pin.OUT)
 
 def led_on():
     LED.on()
