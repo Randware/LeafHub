@@ -7,6 +7,8 @@ from machine import Pin
 CONFIG = config.load()
 LED = Pin(hardware.PINS["status_led"].pin, Pin.OUT)
 
+NETWORK_TYPE = {0: "OPEN", 1: "WEP", 2: "WPA-PSK", 3: "WPA2-PSK", 4: "WPA/WPA2-PSK"}
+
 def led_on():
     LED.on()
 
@@ -21,11 +23,12 @@ def get_networks():
     scanned = wifi.scan()
 
     for net in scanned:
-        ssid:str = net[0].decode("utf-8") if isinstance(net[0], bytes) else net[0]
+        ssid: str = net[0].decode("utf-8") if isinstance(net[0], bytes) else net[0]
         rssi = net[3]
+        network_type: str = NETWORK_TYPE.get(net[4], "UNKNOWN")
 
         if ssid != "":
-            networks.append({"ssid": ssid, "strength": rssi})
+            networks.append({"ssid": ssid, "strength": rssi, "type": network_type})
 
     return networks
 

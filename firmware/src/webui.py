@@ -96,10 +96,7 @@ def handle_request(sock, req):
     response = '{"message": "success"}'
 
     if req.method == "GET":
-        if req.path == "/networks/timeout":
-            response = "{" + f'"timeout": {device.NETWORK_SCAN_TIMEOUT}' + "}"
-
-        elif req.path == "/networks":
+        if req.path == "/networks":
             print("Scanning networks ...")
             networks = device.get_networks()
             print(f"Finished scanning, found {len(networks)} networks")

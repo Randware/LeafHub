@@ -28,9 +28,16 @@ def is_valid() -> bool:
 
             c: Config = Config(**config)
 
-            for _, value in c.__dict__.items():
-                if value is None or value == "":
-                    return False
+            if c.network_ssid is None:
+                return False
+
+            if c.server_address is None:
+                return False
+
+            if c.auth_token is None:
+                return False
+
+            # The network password can be None, if the network is open
 
         return True
     except (OSError, ValueError, TypeError):
