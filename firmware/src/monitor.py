@@ -3,14 +3,13 @@ import requests
 import network
 import device
 import time
-import urequests
+import hardware
 
 NETWORK_CONNECT_ATTEMPTS = 3
-PROBING_INTERVAL = 1
+PROBING_INTERVAL = 5
 
 def connect_network():
     wlan = network.WLAN(network.STA_IF)
-
     wlan.active(True)
 
     conf = config.load()
@@ -43,9 +42,11 @@ def connect_network():
 
     
 def take_probe():
-    # Sample data 
-    #  TODO: Measure sensors
-    data = {"temperature": 34, "humidity": 60}
+    sensors = hardware.SENSORS
+    data = {}
+
+    for sensor in sensors:
+        data[sensor.name] = sensor.read()
 
     return data
 
@@ -63,7 +64,6 @@ def send_probe(url, headers):
         print(f"Failed sending probe ({code}): {text}")
 
     response.close()
-
 
 def start_sending():
     conf = config.load()

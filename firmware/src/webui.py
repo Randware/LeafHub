@@ -8,7 +8,7 @@ from util import Request
 
 SSID = "LeafHubSmartPot"
 PASSWORD = "00000000"
-CHANNEL = 1
+CHANNEL = 11
 
 WEBSERVER_FILES_PATH = "public"
 WEBSERVER_PORT = 80
@@ -18,8 +18,8 @@ WEBSERVER_RUNNING = True
 
 def open_access_point():
     ap = network.WLAN(network.AP_IF)
-    ap.config(essid=SSID, password=PASSWORD, channel=CHANNEL)
     ap.active(True)
+    ap.config(essid=SSID, password=PASSWORD, channel=CHANNEL)
 
     while not ap.active():
         print("Waiting for access point to become active ...")
@@ -28,7 +28,7 @@ def open_access_point():
     print(f"Access Point '{SSID}' opened")
     print(f"Password: {PASSWORD}")
     print(f"IP Address: {ap.ifconfig()[0]}")
-
+    
 
 def serve_not_found(sock, path):
     print(f"Path {path} not found")
@@ -181,6 +181,7 @@ def start_webserver():
             sock.close()
                 
     server_socket.close()
+
 
 
 def start():
