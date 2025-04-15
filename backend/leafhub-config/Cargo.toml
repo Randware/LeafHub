@@ -1,0 +1,11 @@
+[package]
+name = "leafhub-config"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1.0.219", features = ["derive"] }
+serde-xml-rs = "0.6.0"
+serde_json = "1.0.140"
+serde_yml = "0.0.12"
+toml = "0.8.20"
