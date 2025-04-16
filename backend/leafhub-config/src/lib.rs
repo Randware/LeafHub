@@ -1,9 +1,13 @@
 mod states;
-use std::collections::HashMap;
-
+use erased_serde::Serialize as ErasedSerialize;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::Value;
 use states::{Builder, ConfigState, FileFormat, Finished};
+use std::{
+    collections::HashMap,
+    fs::OpenOptions,
+    io::{self, Error, ErrorKind},
+};
 
 pub struct Config<State>
 where
@@ -34,32 +38,64 @@ impl<'a> Config<Builder<'a>> {
     }
 
     /// Adds a default key and value to the Config.
+    /// If the expression returns `None`, then no default parameter gets added.
+    /// This is usefule, in case you want to check for environment variables.
     ///
     /// # Parameters
     ///
     /// - `name`: The name of the key
     /// - `mapper`: The expression that produces the Value
-    pub fn add_default<S, F, T>(mut self, name: S, mapper: F) -> Self
+    pub fn add_default<S, F, T>(mut self, name: String, mapper: F) -> Self
     where
-        S: Into<String>,
         F: Fn(&String) -> Option<T> + 'static,
-        T: Serialize + DeserializeOwned + 'static,
+        T: ErasedSerialize + 'static,
     {
         // Initialize the HashMap if it isn't already (only the case on first time methode call)
         if self.state.default_values.is_none() {
             self.state.default_values = Some(HashMap::new());
         }
 
-        let mapper = Box::new(move |s: &String| -> Value {
-            serde_json::to_value(mapper(s)).unwrap_or(Value::Null)
-        });
+        // Executes the mapper
+        let mapped_value = mapper(&name);
+        // Do nothing when `None` gets returned
+        if mapped_value.is_none() {
+            return self;
+        }
         let mut hash_map = self.state.default_values.unwrap();
-        hash_map.insert(name.into(), mapper);
+        hash_map.insert(name, Box::new(mapped_value.unwrap()));
         self.state.default_values = Some(hash_map);
         self
     }
 
-    pub fn finish(mut self) -> Config<Finished> {
-        todo!()
+    // If enabled overrides any existing file that lies at the set path
+    pub fn override_existing(mut self, override_existing: bool) -> Self {
+        self.state.override_existing = override_existing;
+        self
+    }
+
+    pub fn finish(mut self) -> Result<Config<Finished>, Error> {
+        // Checks if the user set a path
+        if let Some(path) = self.state.path {
+            let mut config = OpenOptions::new();
+            config.read(true).write(true);
+
+            // Set the correct flags for the config
+            if self.state.override_existing {
+                config.truncate(true);
+            } else {
+                config.create(true);
+            }
+
+            let config = config.open(self.state.path.unwrap())?;
+
+            //TODO: Finish up the state transition
+        } else {
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Provide a path to the Config",
+            ));
+        }
+
+        todo!();
     }
 }
