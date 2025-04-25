@@ -15,7 +15,7 @@
 	const steps: Step[] = [
 		{ component: WelcomePage, block: false },
 		{ component: NetworkPage, block: true },
-		{ component: ServerPage, block: false },
+		{ component: ServerPage, block: true },
 		{ component: AuthPage, block: false },
 		{ component: FinishPage, block: false }
 	];

@@ -78,6 +78,6 @@
 		<div class="animate-spin">
 			<Loader size={32} />
 		</div>
-		<div class="font-semibold">Scanning networks...</div>
+		<div class="font-semibold">Scanning networks</div>
 	</div>
 {/if}

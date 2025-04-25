@@ -11,7 +11,9 @@
 	in:fade={{ duration: 300 }}
 >
 	<div
-		class="bg-medium relative h-min max-h-full w-min max-w-full overflow-x-clip overflow-y-auto rounded-xl p-12"
+		class="bg-medium relative max-h-full w-full max-w-lg
+         overflow-x-hidden overflow-y-auto rounded-xl p-12
+         text-wrap"
 		in:scale={{ duration: 300 }}
 	>
 		{#if back}

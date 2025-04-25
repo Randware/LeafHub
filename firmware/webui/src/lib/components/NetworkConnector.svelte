@@ -30,7 +30,7 @@
 				type="text"
 				bind:value={networkName}
 				placeholder="Enter network name"
-				class="border-primary bg-secondary ring-primary w-50 rounded-xl border-2"
+				class="border-primary bg-secondary ring-primary w-full rounded-xl border-2"
 			/>
 		</div>
 	{/if}
@@ -42,7 +42,7 @@
 			type="password"
 			bind:value={networkPassword}
 			placeholder="Enter network password"
-			class="border-primary bg-secondary ring-primary w-50 rounded-xl border-2"
+			class="border-primary bg-secondary ring-primary w-full rounded-xl border-2"
 		/>
 	</div>
 
