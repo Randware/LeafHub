@@ -1,8 +1,8 @@
 <script lang="ts">
 	import FloatingWindow from '../FloatingWindow.svelte';
+	import PageAnimator from '../PageAnimator.svelte';
 	import ServerChecker, { type ServerCheckResult } from '../ServerChecker.svelte';
 	import { CircleCheck } from '@lucide/svelte';
-	import { fly } from 'svelte/transition';
 
 	export let block: boolean;
 
@@ -55,17 +55,19 @@
 			}}>Done</button
 		>
 	{:else}
-		<div class="flex flex-col items-center gap-6" in:fly={{ x: 10, duration: 500, opacity: 0 }}>
-			<div class="font-fancy text-3xl font-extrabold">Finished server configuration!</div>
-			<CircleCheck size={48} class="text-primary" />
-			<button
-				class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
-				onclick={() => {
-					block = true;
-				}}
-			>
-				Reset
-			</button>
-		</div>
+		<PageAnimator>
+			<div class="flex flex-col items-center gap-6">
+				<div class="font-fancy text-3xl font-extrabold">Finished server configuration!</div>
+				<CircleCheck size={48} class="text-primary" />
+				<button
+					class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
+					onclick={() => {
+						block = true;
+					}}
+				>
+					Reset
+				</button>
+			</div>
+		</PageAnimator>
 	{/if}
 </div>

@@ -33,12 +33,12 @@
 <div class="flex flex-col items-center justify-center gap-2">
 	{#if checkResult}
 		{#if checkResult == 'Success'}
-			<div class="flex flex-col items-center gap-6" in:fly={{ x: 10, duration: 500, opacity: 0 }}>
+			<div class="flex flex-col items-center gap-6">
 				<div class="font-fancy text-2xl font-extrabold">Server is reachable!</div>
 				<CircleCheck size={40} class="text-primary" />
 			</div>
 		{:else}
-			<div class="flex flex-col items-center gap-6" in:fly={{ x: 10, duration: 500, opacity: 0 }}>
+			<div class="flex flex-col items-center gap-6">
 				<div class="font-fancy text-2xl font-extrabold">Server could not be reached</div>
 				<Ban size={40} class="text-red-400" />
 			</div>
