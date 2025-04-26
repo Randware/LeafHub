@@ -14,7 +14,7 @@
 		advanced: boolean;
 	};
 
-	const steps: Step[] = [
+	const stepConfig: Step[] = [
 		{ component: WelcomePage, block: false, advanced: false },
 		{ component: NetworkPage, block: true, advanced: false },
 		{ component: ServerPage, block: true, advanced: true },
@@ -22,10 +22,14 @@
 		{ component: FinishPage, block: false, advanced: false }
 	];
 
-	let currentStep: Step = steps[0];
+	$: steps = stepConfig.filter((step) => !step.advanced || step.advanced === $advancedSetup);
 
+	$: currentStep = steps[0];
+
+	const slideDistance = 10;
 	let direction = 1;
-	let slideDistance = 10;
+
+	$: progress = ((steps.indexOf(currentStep) + 1) / steps.length) * 100;
 
 	$: firstPage = currentStep === steps[0];
 	$: lastPage = currentStep === steps[steps.length - 1];
@@ -36,9 +40,7 @@
 		if (idx < steps.length - 1) {
 			direction = 1;
 
-			let nextStep: Step | undefined = steps.find(
-				(step) => steps.indexOf(step) > idx && (!step.advanced || step.advanced === $advancedSetup)
-			);
+			let nextStep: Step | undefined = steps.find((step) => steps.indexOf(step) > idx);
 
 			if (nextStep) {
 				currentStep = steps[steps.indexOf(nextStep)];
@@ -52,9 +54,7 @@
 		if (idx > 0) {
 			direction = -1;
 
-			let prevStep: Step | undefined = steps.findLast(
-				(step) => steps.indexOf(step) < idx && (!step.advanced || step.advanced === $advancedSetup)
-			);
+			let prevStep: Step | undefined = steps.findLast((step) => steps.indexOf(step) < idx);
 
 			if (prevStep) {
 				currentStep = steps[steps.indexOf(prevStep)];
@@ -64,7 +64,14 @@
 </script>
 
 <main class="bg-light text-dark h-full overflow-hidden rounded-xl p-6 text-xl">
-	{#key currentStep}
+	<div class="bg-secondary h-2 w-full rounded-full">
+		<div
+			class="bg-primary h-2 rounded-full transition-[width] duration-500"
+			style="width: {progress}%"
+		></div>
+	</div>
+
+	{#key steps.indexOf(currentStep)}
 		<div
 			in:fly={{ x: direction * slideDistance, duration: 500, opacity: 0 }}
 			class="flex h-full flex-col items-center justify-center"
