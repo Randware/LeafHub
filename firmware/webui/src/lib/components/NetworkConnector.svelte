@@ -8,11 +8,10 @@
 	let networkName: string = network ? network.ssid : '';
 	let networkPassword: string = '';
 
-	$: ssid = networkName.trim();
-	$: password = networkPassword.trim();
+	$: validInput = /^[\x20-\x7E]{8,63}$/.test(networkPassword) && /^[\s\S]{1,32}$/.test(networkName);
 
 	function connectNetwork() {
-		connect(ssid, password);
+		connect(networkName, networkPassword);
 	}
 </script>
 
@@ -33,7 +32,6 @@
 			/>
 		</div>
 	{/if}
-
 	<div class="flex flex-col items-center gap-2 font-semibold">
 		<label for="password" class="text-dark text-lg">Password</label>
 		<input
@@ -45,5 +43,5 @@
 		/>
 	</div>
 
-	<Button onclick={connectNetwork} disabled={ssid === '' || password === ''}>Connect</Button>
+	<Button onclick={connectNetwork} disabled={!validInput}>Connect</Button>
 </div>

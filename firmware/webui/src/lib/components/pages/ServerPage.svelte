@@ -10,6 +10,11 @@
 	let serverAddress: string = '';
 	let showChecker: boolean = false;
 
+	$: validInput =
+		/^https?:\/\/(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}(?::\d{1,5})?\/?$/.test(
+			serverAddress
+		);
+
 	let lastCheck: ServerCheckResult = 'Failure';
 
 	function onResult(result: ServerCheckResult) {
@@ -49,8 +54,7 @@
 			/>
 		</div>
 
-		<Button onclick={() => (showChecker = true)} disabled={serverAddress.trim() === ''}>Done</Button
-		>
+		<Button onclick={() => (showChecker = true)} disabled={!validInput}>Done</Button>
 	{:else}
 		<PageAnimator>
 			<div class="flex flex-col items-center gap-6">
