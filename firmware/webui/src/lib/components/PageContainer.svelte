@@ -6,22 +6,23 @@
 	import NetworkPage from './pages/NetworkPage.svelte';
 	import ServerPage from './pages/ServerPage.svelte';
 	import WelcomePage from './pages/WelcomePage.svelte';
+	import { advancedSetup } from '$lib/store/settings';
 
 	type Step = {
 		component: Component<{ block: boolean }>;
 		block: boolean;
+		advanced: boolean;
 	};
 
 	const steps: Step[] = [
-		{ component: WelcomePage, block: false },
-		{ component: NetworkPage, block: true },
-		{ component: ServerPage, block: true },
-		{ component: AuthPage, block: false },
-		{ component: FinishPage, block: false }
+		{ component: WelcomePage, block: false, advanced: false },
+		{ component: NetworkPage, block: true, advanced: false },
+		{ component: ServerPage, block: true, advanced: true },
+		{ component: AuthPage, block: false, advanced: false },
+		{ component: FinishPage, block: false, advanced: false }
 	];
 
 	let currentStep: Step = steps[0];
-	let currentIndex = 0;
 
 	let direction = 1;
 	let slideDistance = 10;
@@ -34,8 +35,14 @@
 
 		if (idx < steps.length - 1) {
 			direction = 1;
-			currentIndex = idx + 1;
-			currentStep = steps[currentIndex];
+
+			let nextStep: Step | undefined = steps.find(
+				(step) => steps.indexOf(step) > idx && (!step.advanced || step.advanced === $advancedSetup)
+			);
+
+			if (nextStep) {
+				currentStep = steps[steps.indexOf(nextStep)];
+			}
 		}
 	}
 
@@ -44,14 +51,20 @@
 
 		if (idx > 0) {
 			direction = -1;
-			currentIndex = idx - 1;
-			currentStep = steps[currentIndex];
+
+			let prevStep: Step | undefined = steps.findLast(
+				(step) => steps.indexOf(step) < idx && (!step.advanced || step.advanced === $advancedSetup)
+			);
+
+			if (prevStep) {
+				currentStep = steps[steps.indexOf(prevStep)];
+			}
 		}
 	}
 </script>
 
 <main class="bg-light text-dark h-full overflow-hidden rounded-xl p-6 text-xl">
-	{#key currentIndex}
+	{#key currentStep}
 		<div
 			in:fly={{ x: direction * slideDistance, duration: 500, opacity: 0 }}
 			class="flex h-full flex-col items-center justify-center"
