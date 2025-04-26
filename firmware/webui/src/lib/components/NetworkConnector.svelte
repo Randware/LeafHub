@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Button from './Button.svelte';
 	import type { Network } from './NetworkItem.svelte';
 
 	export let network: Network | null = null;
@@ -7,13 +8,11 @@
 	let networkName: string = network ? network.ssid : '';
 	let networkPassword: string = '';
 
-	function connectNetwork() {
-		let ssid: string = networkName.trim();
-		let password: string = networkPassword.trim();
+	$: ssid = networkName.trim();
+	$: password = networkPassword.trim();
 
-		if (ssid != '' && password != '') {
-			connect(ssid, password);
-		}
+	function connectNetwork() {
+		connect(ssid, password);
 	}
 </script>
 
@@ -46,8 +45,5 @@
 		/>
 	</div>
 
-	<button
-		class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
-		onclick={connectNetwork}>Connect</button
-	>
+	<Button onclick={connectNetwork} disabled={ssid === '' || password === ''}>Connect</Button>
 </div>

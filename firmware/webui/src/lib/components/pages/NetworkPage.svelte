@@ -5,6 +5,7 @@
 	import type { Network } from '../NetworkItem.svelte';
 	import NetworkScanner from '../NetworkScanner.svelte';
 	import PageAnimator from '../PageAnimator.svelte';
+	import Button from '../Button.svelte';
 
 	export let block: boolean;
 
@@ -39,14 +40,7 @@
 		<div class="font-fancy text-3xl font-extrabold">Network</div>
 		<div>Let's connect your SmartPot to the internet</div>
 
-		<button
-			class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
-			onclick={() => {
-				showConnector = true;
-			}}
-		>
-			Add Network
-		</button>
+		<Button onclick={() => (showConnector = true)}>Add network</Button>
 
 		<NetworkScanner onSelect={selectNetwork} />
 
@@ -60,14 +54,8 @@
 			<div class="flex flex-col items-center gap-6">
 				<div class="font-fancy text-3xl font-extrabold">Finished network configuration!</div>
 				<CircleCheck size={48} class="text-primary" />
-				<button
-					class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
-					onclick={() => {
-						block = true;
-					}}
-				>
-					Reset
-				</button>
+
+				<Button onclick={() => (block = true)}>Reset</Button>
 			</div>
 		</PageAnimator>
 	{/if}

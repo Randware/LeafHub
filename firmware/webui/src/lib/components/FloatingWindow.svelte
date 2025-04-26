@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { X } from '@lucide/svelte';
 	import { fade, scale } from 'svelte/transition';
+	import Button from './Button.svelte';
 
 	export let back: (() => void) | null = null;
 </script>
@@ -17,13 +18,10 @@
 		in:scale={{ duration: 300 }}
 	>
 		{#if back}
-			<button
-				class="text-dark bg-primary hover:bg-primary/70 absolute top-3 right-3 rounded-xl p-2 text-xl font-semibold transition-colors"
-				onclick={back}
-				aria-label="Close modal"
-			>
+			<!-- The "!" is required to override the internal padding -->
+			<Button onclick={back} className="absolute top-3 right-3 !p-2">
 				<X size={24} />
-			</button>
+			</Button>
 		{/if}
 
 		<slot />

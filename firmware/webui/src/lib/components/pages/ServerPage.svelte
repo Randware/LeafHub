@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Button from '../Button.svelte';
 	import FloatingWindow from '../FloatingWindow.svelte';
 	import PageAnimator from '../PageAnimator.svelte';
 	import ServerChecker, { type ServerCheckResult } from '../ServerChecker.svelte';
@@ -48,25 +49,14 @@
 			/>
 		</div>
 
-		<button
-			class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
-			onclick={() => {
-				showChecker = true;
-			}}>Done</button
+		<Button onclick={() => (showChecker = true)} disabled={serverAddress.trim() === ''}>Done</Button
 		>
 	{:else}
 		<PageAnimator>
 			<div class="flex flex-col items-center gap-6">
 				<div class="font-fancy text-3xl font-extrabold">Finished server configuration!</div>
 				<CircleCheck size={48} class="text-primary" />
-				<button
-					class="text-dark bg-primary hover:bg-primary/70 rounded-xl px-4 py-2 text-xl font-semibold transition-colors"
-					onclick={() => {
-						block = true;
-					}}
-				>
-					Reset
-				</button>
+				<Button onclick={() => (block = true)}>Reset</Button>
 			</div>
 		</PageAnimator>
 	{/if}
