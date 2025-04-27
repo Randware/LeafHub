@@ -64,14 +64,16 @@
 	}
 </script>
 
-<main class="bg-light text-dark h-full overflow-hidden rounded-xl p-6 text-xl">
-	<div class="bg-secondary h-2 w-full rounded-full">
+<header>
+	<div class="bg-light h-2 w-full rounded-full">
 		<div
 			class="bg-primary h-2 rounded-full transition-[width] duration-500"
 			style="width: {progress}%"
 		></div>
 	</div>
+</header>
 
+<main class="bg-light text-dark h-full overflow-hidden rounded-xl p-6 text-xl">
 	{#key steps.indexOf(currentStep)}
 		<div
 			in:fly={{ x: direction * slideDistance, duration: 500, opacity: 0 }}
